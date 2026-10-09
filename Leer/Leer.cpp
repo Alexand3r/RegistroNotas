@@ -4,51 +4,53 @@
 #include <string>
 using namespace std;
 
-// Imprime la fila de títulos de la tabla
+static const int ANCHO_TABLA = 96;
+
 static void imprimirEncabezado() {
     cout << left
-         << setw(8)  << "ID"
-         << setw(25) << "Estudiante"
-         << setw(20) << "Curso"
-         << setw(18) << "Evaluacion"
+         << setw(10) << "Carnet"
+         << setw(20) << "Estudiante"
+         << setw(18) << "Carrera"
+         << setw(18) << "Curso"
+         << setw(14) << "Evaluacion"
          << right
          << setw(8)  << "Nota"
-         << setw(8)  << "Peso" << "\n";
-    cout << string(87, '-') << "\n";
+         << setw(8)  << "Pond." << "\n";
+    cout << string(ANCHO_TABLA, '-') << "\n";
 }
 
-// Imprime un registro como una fila de la tabla
-static void imprimirFila(const Registro& r) {
+static void imprimirFila(const Registrodenotas& r) {
     cout << left
-         << setw(8)  << r.id
-         << setw(25) << r.estudiante
-         << setw(20) << r.curso
-         << setw(18) << r.tipoEvaluacion
+         << setw(10) << r.carnet
+         << setw(20) << r.estudiante.substr(0, 19)
+         << setw(18) << r.Carrera.substr(0, 17)
+         << setw(18) << r.curso.substr(0, 17)
+         << setw(14) << r.tipoEvaluacion.substr(0, 13)
          << right << fixed << setprecision(2)
          << setw(8)  << r.nota
          << setw(8)  << r.ponderacion << "\n";
 }
 
-// Muestra todas las notas en formato de tabla
-void listarNotas(const vector<Registro>& listaNotas) {
-    if (listaNotas.empty()) {
+void listarNotas(const vector<Registrodenotas>& registros) {
+    if (registros.empty()) {
         cout << "No hay notas registradas.\n";
         return;
     }
     imprimirEncabezado();
-    for (const Registro& r : listaNotas) {
+    for (const auto& r : registros) {
         imprimirFila(r);
     }
+    cout << string(ANCHO_TABLA, '-') << "\n"
+         << "Total: " << registros.size() << " registro(s)\n";
 }
 
-// Busca un registro por ID y lo muestra
-void buscarPorID(const vector<Registro>& listaNotas, int id) {
-    for (const Registro& r : listaNotas) {
-        if (r.id == id) {
+void buscarPorCarnet(const vector<Registrodenotas>& registros, int carnet) {
+    for (const auto& r : registros) {
+        if (r.carnet == carnet) {
             imprimirEncabezado();
             imprimirFila(r);
             return;
         }
     }
-    cout << "No se encontro ningun registro con ID " << id << ".\n";
+    cout << "No se encontro ninguna nota con el carnet " << carnet << ".\n";
 }
