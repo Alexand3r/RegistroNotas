@@ -1,16 +1,12 @@
 #ifndef REGISTRO_H
-#define REGISTRO_H
-#include <iostream> //Bibliotecas a utilizar
+#define REGISTRO_H //Bibliotecas a utilizar
 #include <string>
-using namespace std;
 
-struct Registrodenotas //Conjunto de datos relacionados que agregare en un sola variable
+struct Registro //Conjunto de datos relacionados que agregare en un sola variable
 {
-  int carnet;
-  string estudiante;
-  string Carrera;
-  string curso;
-  string tipoEvaluacion;
+  std::string id;
+  std::string estudiante;
+  std::string tipoEvaluacion;
   double nota;
   double ponderacion;
 
