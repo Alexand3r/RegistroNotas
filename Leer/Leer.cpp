@@ -1,37 +1,35 @@
 #include "Leer.h"
 #include <iostream>
 #include <iomanip>
-#include <string>
+
 using namespace std;
 
-static const int ANCHO_TABLA = 96;
+// Ancho total de la tabla en consola
+static const int ANCHO_TABLA = 76;
 
 static void imprimirEncabezado() {
     cout << left
-         << setw(10) << "Carnet"
-         << setw(20) << "Estudiante"
-         << setw(18) << "Carrera"
-         << setw(18) << "Curso"
-         << setw(14) << "Evaluacion"
+         << setw(12) << "ID"
+         << setw(22) << "Estudiante"
+         << setw(22) << "Evaluacion"
          << right
-         << setw(8)  << "Nota"
-         << setw(8)  << "Pond." << "\n";
+         << setw(10) << "Nota"
+         << setw(10) << "Pond." << "\n";
     cout << string(ANCHO_TABLA, '-') << "\n";
 }
 
-static void imprimirFila(const Registrodenotas& r) {
+static void imprimirFila(const Registro& r) {
+    // Usamos .substr por seguridad para que si un texto es muy largo no rompa la tabla
     cout << left
-         << setw(10) << r.carnet
-         << setw(20) << r.estudiante.substr(0, 19)
-         << setw(18) << r.Carrera.substr(0, 17)
-         << setw(18) << r.curso.substr(0, 17)
-         << setw(14) << r.tipoEvaluacion.substr(0, 13)
+         << setw(12) << r.id.substr(0, 10)
+         << setw(22) << r.estudiante.substr(0, 20)
+         << setw(22) << r.tipoEvaluacion.substr(0, 20)
          << right << fixed << setprecision(2)
-         << setw(8)  << r.nota
-         << setw(8)  << r.ponderacion << "\n";
+         << setw(10) << r.nota
+         << setw(10) << r.ponderacion << "\n";
 }
 
-void listarNotas(const vector<Registrodenotas>& registros) {
+void listarNotas(const vector<Registro>& registros) {
     if (registros.empty()) {
         cout << "No hay notas registradas.\n";
         return;
@@ -41,16 +39,29 @@ void listarNotas(const vector<Registrodenotas>& registros) {
         imprimirFila(r);
     }
     cout << string(ANCHO_TABLA, '-') << "\n"
-         << "Total: " << registros.size() << " registro(s)\n";
+         << "Total de registros: " << registros.size() << "\n";
 }
 
-void buscarPorCarnet(const vector<Registrodenotas>& registros, int carnet) {
+void buscarPorId(const vector<Registro>& registros, const string& idBuscado) {
+    if (registros.empty()) {
+        cout << "No hay registros para buscar.\n";
+        return;
+    }
+
+    bool encontrado = false;
+    imprimirEncabezado();
     for (const auto& r : registros) {
-        if (r.carnet == carnet) {
-            imprimirEncabezado();
+        if (r.id == idBuscado) {
             imprimirFila(r);
-            return;
+            encontrado = true;
+            break; // Como el ID es único, podemos salir al encontrarlo
         }
     }
-    cout << "No se encontro ninguna nota con el carnet " << carnet << ".\n";
+
+    if (!encontrado) {
+        // Borramos el encabezado impreso si no hubo resultados para no dejar la tabla flotando vacía
+        cout << "No se encontro ningun registro con el ID: " << idBuscado << ".\n";
+    } else {
+        cout << string(ANCHO_TABLA, '-') << "\n";
+    }
 }

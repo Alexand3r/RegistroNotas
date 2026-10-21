@@ -1,33 +1,23 @@
 #include "Crear.h"
+#include "../Base/Json.h"
 #include <iostream>
 
 using namespace std;
 
-// ---------- Funciones auxiliares de validación ----------
-
-static bool existeId(const vector<RegistroNota>& registros, int id) {
+// Función auxiliar para verificar si el ID ya existe en el vector
+static bool existeId(const vector<Registro>& registros, const string& id) {
     for (const auto& r : registros) {
         if (r.id == id) return true;
     }
     return false;
 }
 
+// Verifica si un texto está vacío o solo tiene espacios
 static bool textoVacio(const string& s) {
     return s.find_first_not_of(" \t") == string::npos;
 }
 
-// Convierte texto a int. Falla si hay letras ("12abc") o está vacío.
-static bool aEntero(const string& s, int& valor) {
-    try {
-        size_t pos;
-        valor = stoi(s, &pos);
-        return pos == s.size();
-    } catch (...) {
-        return false;
-    }
-}
-
-// Convierte texto a double. Falla si hay letras.
+// Convierte texto a double de forma segura
 static bool aDecimal(const string& s, double& valor) {
     try {
         size_t pos;
@@ -38,37 +28,31 @@ static bool aDecimal(const string& s, double& valor) {
     }
 }
 
-// ---------- Lógica principal ----------
-
-bool crearNota(vector<RegistroNota>& registros,
-               const RegistroNota& nuevo,
-               string& error) {
-    if (nuevo.id <= 0) {
-        error = "El ID debe ser un entero positivo.";
+bool crearNota(vector<Registro>& registros, const Registro& nuevo, string& error) {
+    // Validación crítica exigida por la rúbrica: ID no vacío y no duplicado[cite: 1]
+    if (textoVacio(nuevo.id)) {
+        error = "El ID no puede estar vacio.";
         return false;
     }
     if (existeId(registros, nuevo.id)) {
-        error = "Ya existe un registro con el ID " + to_string(nuevo.id) + ".";
+        error = "Ya existe un registro con el ID " + nuevo.id + ".";
         return false;
     }
     if (textoVacio(nuevo.estudiante)) {
         error = "El nombre del estudiante no puede estar vacio.";
         return false;
     }
-    if (textoVacio(nuevo.curso)) {
-        error = "El curso no puede estar vacio.";
-        return false;
-    }
     if (textoVacio(nuevo.tipoEvaluacion)) {
         error = "El tipo de evaluacion no puede estar vacio.";
         return false;
     }
+    // Validación de rangos lógicos
     if (nuevo.nota < 0 || nuevo.nota > 100) {
         error = "La nota debe estar entre 0 y 100.";
         return false;
     }
-    if (nuevo.peso <= 0 || nuevo.peso > 100) {
-        error = "El peso debe ser mayor que 0 y maximo 100.";
+    if (nuevo.ponderacion <= 0 || nuevo.ponderacion > 100) {
+        error = "La ponderacion debe ser mayor que 0 y maximo 100.";
         return false;
     }
 
@@ -76,44 +60,39 @@ bool crearNota(vector<RegistroNota>& registros,
     return true;
 }
 
-// ---------- Interacción con el usuario ----------
-
-void solicitarNuevaNota(vector<RegistroNota>& registros) {
-    RegistroNota r;
+void solicitarNuevaNota(vector<Registro>& registros, const string& nombreArchivo) {
+    Registro r;
     string entrada, error;
 
-    cout << "ID: ";
-    getline(cin, entrada);
-    if (!aEntero(entrada, r.id)) {
-        cout << "Error: el ID debe ser un numero entero.\n";
-        return;
-    }
+    cout << "\n--- Registrar Nueva Nota ---\n";
+    cout << "ID (clave unica): ";
+    getline(cin, r.id);
 
     cout << "Estudiante: ";
     getline(cin, r.estudiante);
 
-    cout << "Curso: ";
-    getline(cin, r.curso);
-
-    cout << "Tipo de evaluacion: ";
+    cout << "Tipo de evaluacion (ej. Parcial, Tarea): ";
     getline(cin, r.tipoEvaluacion);
 
-    cout << "Nota: ";
+    cout << "Nota (0-100): ";
     getline(cin, entrada);
     if (!aDecimal(entrada, r.nota)) {
-        cout << "Error: la nota debe ser un numero, no texto.\n";
+        cout << "Error: la nota debe ser un numero valido.\n";
         return;
     }
 
-    cout << "Peso: ";
+    cout << "Peso/Ponderacion (ej. 20 para 20%): ";
     getline(cin, entrada);
-    if (!aDecimal(entrada, r.peso)) {
-        cout << "Error: el peso debe ser un numero, no texto.\n";
+    if (!aDecimal(entrada, r.ponderacion)) {
+        cout << "Error: la ponderacion debe ser un numero valido.\n";
         return;
     }
 
+    // Intentamos agregar la nota usando la lógica validada
     if (crearNota(registros, r, error)) {
-        cout << "Nota registrada correctamente.\n";
+        // Guardado automático en el archivo JSON
+        guardarJSON(registros, nombreArchivo);
+        cout << "Nota registrada y guardada correctamente en el archivo.\n";
     } else {
         cout << "Error: " << error << "\n";
     }

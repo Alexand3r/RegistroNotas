@@ -6,7 +6,7 @@ using namespace std;
 using json = nlohmann::json;
 
 //nlomann convierte mi struct a formato Json y viceversa.
-NLOHMANN_DEFINE_DERIVED_TYPE_NON_INTRUSIVE(Registro, id, estudiante, tipoEvaluacion, nota, ponderacion)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Registro, id, estudiante, tipoEvaluacion, nota, ponderacion)
 
 //Esta es la funcion para guardar en Json
 void guardarJSON(const std::vector<Registro>& listaNotas, const std::string& nombreArchivo) {
