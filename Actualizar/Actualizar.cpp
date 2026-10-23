@@ -1,31 +1,17 @@
 #include "Actualizar.h"
-#include "../Base/Json.h"  
+#include "../Base/Json.h"
 #include <iostream>
 #include <iomanip>
-#include <string>
-#include <vector>
 #include <cmath>
 
 using namespace std;
 
-static double& ponderacionDe(Registro& r)             { return r.ponderacion; }
-static double  ponderacionDe(const Registro& r)       { return r.ponderacion; }
-
-
+// Verifica si un texto está vacío o solo tiene espacios
 static bool textoVacio(const string& s) {
     return s.find_first_not_of(" \t") == string::npos;
 }
 
-static bool aEntero(const string& s, int& valor) {
-    try {
-        size_t pos;
-        valor = stoi(s, &pos);
-        return pos == s.size();
-    } catch (...) {
-        return false;
-    }
-}
-
+// Convierte texto a double de forma segura
 static bool aDecimal(const string& s, double& valor) {
     try {
         size_t pos;
@@ -36,60 +22,59 @@ static bool aDecimal(const string& s, double& valor) {
     }
 }
 
-static int buscarIndicePorId(const vector<Registro>& lista, int id) {
+// Busca el índice de un registro por su ID (string)
+static int buscarIndicePorId(const vector<Registro>& lista, const string& idBuscado) {
     for (size_t i = 0; i < lista.size(); i++) {
-        if (lista[i].id == id) return (int)i;
+        if (lista[i].id == idBuscado) return static_cast<int>(i);
     }
     return -1;
 }
 
 bool actualizarNota(vector<Registro>& listaNotas, const string& nombreArchivo) {
-    string entrada;
-    int id;
-
-    cout << "ID del registro a modificar: ";
-    getline(cin, entrada);
-    if (!aEntero(entrada, id)) {
-        cout << "Error: el ID debe ser un numero entero.\n";
+    if (listaNotas.empty()) {
+        cout << "No hay registros para actualizar.\n";
         return false;
     }
 
-    int idx = buscarIndicePorId(listaNotas, id);
+    string idBuscado;
+    cout << "Ingrese el ID del registro a modificar: ";
+    getline(cin, idBuscado);
+
+    int idx = buscarIndicePorId(listaNotas, idBuscado);
     if (idx == -1) {
-        cout << "Error: no existe un registro con ID " << id << ".\n";
+        cout << "Error: No existe un registro con el ID " << idBuscado << ".\n";
         return false;
     }
 
-    Registro& r = listaNotas[idx];
-    cout << "\nRegistro actual:\n"
-         << "  Estudiante : " << r.estudiante << "\n"
-         << "  Curso      : " << r.curso << "\n"
-         << "  Evaluacion : " << r.tipoEvaluacion << "\n"
-         << fixed << setprecision(2)
-         << "  Nota       : " << r.nota << "\n"
-         << "  Ponderacion: " << ponderacionDe(r) << "\n"
-         << "\n(Presiona Enter para dejar un campo sin cambios)\n\n";
+    Registro r = listaNotas[idx];
+    cout << "\n--- Registro Actual ---\n";
+    cout << "ID             : " << r.id << "\n";
+    cout << "Estudiante     : " << r.estudiante << "\n";
+    cout << "Tipo Evaluacion: " << r.tipoEvaluacion << "\n";
+    cout << "Nota           : " << fixed << setprecision(2) << r.nota << "\n";
+    cout << "Ponderacion    : " << r.ponderacion << "%\n";
+    cout << "\n(Presione Enter sin escribir nada para dejar el campo sin cambios)\n\n";
 
     Registro nuevo = r;
+    string entrada;
 
     cout << "Nuevo estudiante [" << r.estudiante << "]: ";
     getline(cin, entrada);
     if (!entrada.empty()) {
-        if (textoVacio(entrada)) { cout << "Error: el estudiante no puede estar vacio.\n"; return false; }
+        if (textoVacio(entrada)) {
+            cout << "Error: el estudiante no puede estar vacio.\n";
+            return false;
+        }
         nuevo.estudiante = entrada;
-    }
-
-    cout << "Nuevo curso [" << r.curso << "]: ";
-    getline(cin, entrada);
-    if (!entrada.empty()) {
-        if (textoVacio(entrada)) { cout << "Error: el curso no puede estar vacio.\n"; return false; }
-        nuevo.curso = entrada;
     }
 
     cout << "Nuevo tipo de evaluacion [" << r.tipoEvaluacion << "]: ";
     getline(cin, entrada);
     if (!entrada.empty()) {
-        if (textoVacio(entrada)) { cout << "Error: el tipo de evaluacion no puede estar vacio.\n"; return false; }
+        if (textoVacio(entrada)) {
+            cout << "Error: el tipo de evaluacion no puede estar vacio.\n";
+            return false;
+        }
         nuevo.tipoEvaluacion = entrada;
     }
 
@@ -104,76 +89,79 @@ bool actualizarNota(vector<Registro>& listaNotas, const string& nombreArchivo) {
         nuevo.nota = n;
     }
 
-    cout << "Nueva ponderacion (mayor que 0, maximo 100) [" << ponderacionDe(r) << "]: ";
+    cout << "Nueva ponderacion (mayor a 0, maximo 100) [" << r.ponderacion << "]: ";
     getline(cin, entrada);
     if (!entrada.empty()) {
         double p;
         if (!aDecimal(entrada, p) || p <= 0 || p > 100) {
-            cout << "Error: la ponderacion debe ser mayor que 0 y maximo 100. No se modifico nada.\n";
+            cout << "Error: la ponderacion debe ser mayor a 0 y maximo 100. No se modifico nada.\n";
             return false;
         }
-        ponderacionDe(nuevo) = p;
+        nuevo.ponderacion = p;
     }
 
-    r = nuevo;                           
-    guardarJSON(listaNotas, nombreArchivo); 
-    cout << "\nRegistro actualizado correctamente.\n";
+    listaNotas[idx] = nuevo;
+    guardarJSON(listaNotas, nombreArchivo);
+    cout << "\nRegistro actualizado y guardado correctamente.\n";
     return true;
 }
 
-double calcularPromedioFinal(const vector<Registro>& listaNotas,
-                             const string& estudiante,
-                             const string& curso) {
+// Promedio final ponderado por tipo de evaluación
+double calcularPromedioFinal(const vector<Registro>& listaNotas, const string& estudiante) {
     double sumaPonderada = 0.0;
     double sumaPesos = 0.0;
 
     for (const Registro& r : listaNotas) {
-        if (r.estudiante == estudiante && r.curso == curso) {
-            sumaPonderada += r.nota * ponderacionDe(r);
-            sumaPesos += ponderacionDe(r);
+        if (r.estudiante == estudiante) {
+            sumaPonderada += (r.nota * r.ponderacion);
+            sumaPesos += r.ponderacion;
         }
     }
 
-    if (sumaPesos <= 0.0) return -1.0;  
+    if (sumaPesos <= 0.0) return -1.0;
     return sumaPonderada / sumaPesos;
 }
 
 void mostrarPromedioFinal(const vector<Registro>& listaNotas) {
-    string estudiante, curso;
+    if (listaNotas.empty()) {
+        cout << "No hay notas registradas.\n";
+        return;
+    }
 
-    cout << "Estudiante: ";
+    string estudiante;
+    cout << "Ingrese el nombre exacto del estudiante: ";
     getline(cin, estudiante);
-    cout << "Curso: ";
-    getline(cin, curso);
 
-    double promedio = calcularPromedioFinal(listaNotas, estudiante, curso);
+    double promedio = calcularPromedioFinal(listaNotas, estudiante);
     if (promedio < 0) {
-        cout << "No hay notas registradas para ese estudiante en ese curso.\n";
+        cout << "No se encontraron notas registradas para el estudiante: " << estudiante << ".\n";
         return;
     }
 
     double totalPesos = 0.0;
-    cout << "\nDetalle de " << estudiante << " - " << curso << ":\n";
-    cout << left << setw(22) << "Evaluacion"
-         << right << setw(8) << "Nota"
+    cout << "\n--- Detalle de Calificaciones para: " << estudiante << " ---\n";
+    cout << left << setw(25) << "Evaluacion"
+         << right << setw(10) << "Nota"
          << setw(10) << "Pond."
          << setw(12) << "Aporte" << "\n";
-    cout << string(52, '-') << "\n";
+    cout << string(57, '-') << "\n";
 
     for (const Registro& r : listaNotas) {
-        if (r.estudiante == estudiante && r.curso == curso) {
-            totalPesos += ponderacionDe(r);
-            cout << left << setw(22) << r.tipoEvaluacion
+        if (r.estudiante == estudiante) {
+            totalPesos += r.ponderacion;
+            double aporte = (r.nota * r.ponderacion) / 100.0;
+            cout << left << setw(25) << r.tipoEvaluacion.substr(0, 24)
                  << right << fixed << setprecision(2)
-                 << setw(8) << r.nota
-                 << setw(10) << ponderacionDe(r)
-                 << setw(12) << (r.nota * ponderacionDe(r) / 100.0) << "\n";
+                 << setw(10) << r.nota
+                 << setw(10) << r.ponderacion
+                 << setw(12) << aporte << "\n";
         }
     }
-    cout << string(52, '-') << "\n";
-    cout << "Suma de ponderaciones: " << totalPesos << "%\n";
+
+    cout << string(57, '-') << "\n";
+    cout << "Suma total de ponderaciones: " << totalPesos << "%\n";
     if (fabs(totalPesos - 100.0) > 0.01) {
-        cout << "Aviso: las ponderaciones no suman 100%; el promedio se calcula con la suma actual.\n";
+        cout << "Aviso: Las ponderaciones no suman exactamente 100% (Suma actual: " << totalPesos << "%).\n";
     }
     cout << "PROMEDIO FINAL PONDERADO: " << fixed << setprecision(2) << promedio << "\n";
 }
