@@ -9,7 +9,7 @@
 #include "Leer/Leer.h"
 #include "Actualizar/Actualizar.h"
 #include "Eliminar/Eliminar.h"
-
+#include "Base/Csv.h"
 using namespace std;
 
 // Nombre del archivo físico donde persistirán los datos
@@ -48,9 +48,10 @@ int main() {
         cout << "5. Eliminar nota\n";
         cout << "6. Calcular promedio final ponderado\n";
         cout << "7. Salir del programa\n";
+        cout << "8. Exportar datos a Excel (CSV)" << endl;
         cout << "===========================================\n";
-        cout << "Seleccione una opcion (1-7): ";
-
+        cout << "Seleccione una opcion (1-8): ";
+        
         getline(cin, entrada);
 
         // Validación segura para evitar que letras colapsen el menú
@@ -88,8 +89,10 @@ int main() {
                 guardarJSON(listaNotas, NOMBRE_ARCHIVO);
                 cout << "¡Programa finalizado con exito!\n";
                 break;
+            case 8:
+            exportarCSV(listaNotas);break;    
             default:
-                cout << "\n[Error] Opcion invalida. Ingrese un numero entre 1 y 7.\n";
+                cout << "\n[Error] Opcion invalida. Ingrese un numero entre 1 y 8.\n";
         }
 
     } while (opcion != 7);
