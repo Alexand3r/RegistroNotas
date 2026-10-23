@@ -4,7 +4,7 @@
 
 using namespace std;
 
-// Función auxiliar para verificar si el ID ya existe en el vector
+// Función auxiliar para verificar si  ID ya existe en el vector
 static bool existeId(const vector<Registro>& registros, const string& id) {
     for (const auto& r : registros) {
         if (r.id == id) return true;
@@ -12,7 +12,7 @@ static bool existeId(const vector<Registro>& registros, const string& id) {
     return false;
 }
 
-// Verifica si un texto está vacío o solo tiene espacios
+// Verifica si eñ texto está vacío o solo tiene espacios
 static bool textoVacio(const string& s) {
     return s.find_first_not_of(" \t") == string::npos;
 }
@@ -29,7 +29,7 @@ static bool aDecimal(const string& s, double& valor) {
 }
 
 bool crearNota(vector<Registro>& registros, const Registro& nuevo, string& error) {
-    // Validación crítica exigida por la rúbrica: ID no vacío y no duplicado[cite: 1]
+    // ID no vacío y no duplicado
     if (textoVacio(nuevo.id)) {
         error = "El ID no puede estar vacio.";
         return false;
@@ -65,13 +65,13 @@ void solicitarNuevaNota(vector<Registro>& registros, const string& nombreArchivo
     string entrada, error;
 
     cout << "\n--- Registrar Nueva Nota ---\n";
-    cout << "ID (clave unica): ";
+    cout << "ID: ";
     getline(cin, r.id);
 
     cout << "Estudiante: ";
     getline(cin, r.estudiante);
 
-    cout << "Tipo de evaluacion (ej. Parcial, Tarea): ";
+    cout << "Tipo de evaluacion (ej. Examen, Parcial, Tarea): ";
     getline(cin, r.tipoEvaluacion);
 
     cout << "Nota (0-100): ";
@@ -81,7 +81,7 @@ void solicitarNuevaNota(vector<Registro>& registros, const string& nombreArchivo
         return;
     }
 
-    cout << "Peso/Ponderacion (ej. 20 para 20%): ";
+    cout << "Ponderacion (ej. 20 para 20%): ";
     getline(cin, entrada);
     if (!aDecimal(entrada, r.ponderacion)) {
         cout << "Error: la ponderacion debe ser un numero valido.\n";

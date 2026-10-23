@@ -4,7 +4,7 @@
 
 using namespace std;
 
-// Ancho total de la tabla en consola
+//definimos el Ancho total de la tabla en consola
 static const int ANCHO_TABLA = 76;
 
 static void imprimirEncabezado() {
@@ -54,7 +54,7 @@ void buscarPorId(const vector<Registro>& registros, const string& idBuscado) {
         if (r.id == idBuscado) {
             imprimirFila(r);
             encontrado = true;
-            break; // Como el ID es único, podemos salir al encontrarlo
+            break; // Como el ID es único sepodemos salir al encontrarlo
         }
     }
 

@@ -5,18 +5,18 @@
 using namespace std;
 
 bool eliminarNota(vector<Registro>& listaNotas, const string& nombreArchivo) {
-    // 1. Validar si la lista está vacía
+    // Valida si la lista está vacía
     if (listaNotas.empty()) {
         cout << "No hay registros para eliminar.\n";
         return false;
     }
 
-    // 2. Pedir el ID a buscar
+    // Pide el ID a buscar
     string idBuscado;
     cout << "Ingrese el ID del registro a eliminar: ";
     getline(cin, idBuscado);
 
-    // 3. Buscar el índice del registro en el vector
+    // Busca el índice del registro en el vector
     int idx = -1;
     for (size_t i = 0; i < listaNotas.size(); i++) {
         if (listaNotas[i].id == idBuscado) {
@@ -25,13 +25,13 @@ bool eliminarNota(vector<Registro>& listaNotas, const string& nombreArchivo) {
         }
     }
 
-    // 4. Si no se encuentra, avisar claramente
+    // Si no se encuentra, lo avisa claramente
     if (idx == -1) {
         cout << "Error: No existe un registro con el ID " << idBuscado << ".\n";
         return false;
     }
 
-    // 5. Mostrar los datos del registro encontrado antes de borrar
+    //Mostrar los datos del registro encontrado antes de borrar
     const Registro& r = listaNotas[idx];
     cout << "\n--- Registro Encontrado ---\n";
     cout << "ID            : " << r.id << "\n";
@@ -40,7 +40,7 @@ bool eliminarNota(vector<Registro>& listaNotas, const string& nombreArchivo) {
     cout << "Nota          : " << r.nota << "\n";
     cout << "Ponderacion   : " << r.ponderacion << "\n";
 
-    // 6. Validación crítica exigida por la rúbrica: Confirmación (s/n) antes de borrar
+    //Confirmación (s/n) antes de borrar
     char respuesta;
     cout << "\nDesea eliminar este registro? (s/n): ";
     cin >> respuesta;
@@ -56,7 +56,7 @@ bool eliminarNota(vector<Registro>& listaNotas, const string& nombreArchivo) {
         return false;
     }
 
-    // 7. Borrar del vector y actualizar el archivo JSON inmediatamente
+    //Borrar del vector y actualizar el archivo JSON inmediatamente
     listaNotas.erase(listaNotas.begin() + idx);
     guardarJSON(listaNotas, nombreArchivo);
     

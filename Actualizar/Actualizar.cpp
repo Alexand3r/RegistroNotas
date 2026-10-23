@@ -106,7 +106,7 @@ bool actualizarNota(vector<Registro>& listaNotas, const string& nombreArchivo) {
     return true;
 }
 
-// REGLA ESPECIAL GRUPO 4: Promedio final ponderado por tipo de evaluación[cite: 1, 12, 13]
+// Promedio final ponderado por tipo de evaluación
 double calcularPromedioFinal(const vector<Registro>& listaNotas, const string& estudiante) {
     double sumaPonderada = 0.0;
     double sumaPesos = 0.0;

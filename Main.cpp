@@ -25,7 +25,7 @@ static void limpiarPantalla() {
 }
 
 int main() {
-    // 1. Al iniciar, cargamos los datos existentes desde el archivo JSON a la memoria (Vector)
+    // Al comenza, cargamos los datos existentes desde el archivo JSON a la memoria (Vector)
     vector<Registro> listaNotas = cargarJSON(NOMBRE_ARCHIVO);
     
     int opcion = 0;
@@ -37,16 +37,16 @@ int main() {
         getline(cin, entrada);
         limpiarPantalla();
 
-        // 2. Menú principal numerado exigido por la rúbrica
+        // Este es el menu principal
         cout << "===========================================\n";
-        cout << "    SISTEMA DE REGISTRO DE NOTAS - GRUPO 4 \n";
+        cout << "    SISTEMA DE REGISTRO DE NOTAS\n";
         cout << "===========================================\n";
-        cout << "1. Registrar nueva nota (Crear)\n";
+        cout << "1. Registrar nueva nota\n";
         cout << "2. Listar todas las notas\n";
         cout << "3. Buscar nota por ID\n";
         cout << "4. Actualizar nota existente\n";
         cout << "5. Eliminar nota\n";
-        cout << "6. Calcular promedio final ponderado (Regla Grupo 4)\n";
+        cout << "6. Calcular promedio final ponderado\n";
         cout << "7. Salir del programa\n";
         cout << "===========================================\n";
         cout << "Seleccione una opcion (1-7): ";
